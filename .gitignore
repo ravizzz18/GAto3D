@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+.env
+outputs/images/*
+!outputs/images/.gitkeep
+outputs/ocr/*
+!outputs/ocr/.gitkeep
+outputs/representations/*
+!outputs/representations/.gitkeep
+outputs/cad/*
+!outputs/cad/.gitkeep
+outputs/reports/*
+!outputs/reports/.gitkeep

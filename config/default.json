@@ -1,0 +1,21 @@
+{
+  "rendering": {
+    "dpi": 300
+  },
+  "preprocessing": {
+    "denoise_kernel_size": 3,
+    "contrast_clip_limit": 2.0,
+    "contrast_tile_grid_size": 8,
+    "threshold_method": "background_subtraction",
+    "adaptive_block_size": 51,
+    "adaptive_c": 7,
+    "background_sigma": 15.0,
+    "background_threshold": 20,
+    "morphology_open_kernel_size": 1,
+    "morphology_open_iterations": 1,
+    "min_component_area": 8,
+    "max_component_area_ratio": 0.20,
+    "deskew_threshold_degrees": 0.5,
+    "line_enhancement_amount": 0.35
+  }
+}
