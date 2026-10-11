@@ -10,6 +10,8 @@ from typing import Any, Callable
 import cv2
 import numpy as np
 
+from src.utils.traceability import write_run_manifest
+
 
 class OCRError(RuntimeError):
     """Raised when OCR cannot be performed or its input is invalid."""
@@ -166,7 +168,7 @@ def extract_text(result: OCRResult) -> str:
     return result.extracted_text
 
 
-def save_ocr_result(result: OCRResult, output_dir: str | Path = "outputs/ocr") -> dict[str, Path]:
+def save_ocr_result(result: OCRResult, output_dir: str | Path = "outputs/ocr", run_id: str | None = None) -> dict[str, Path]:
     output = Path(output_dir)
     output.mkdir(parents=True, exist_ok=True)
     text_path = output / "extracted_text.txt"
@@ -184,4 +186,7 @@ def save_ocr_result(result: OCRResult, output_dir: str | Path = "outputs/ocr") -
     }
     json_path = output / "ocr_results.json"
     json_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
-    return {"extracted_text": text_path, "results": json_path, "visualization": visualization_path}
+    paths = {"extracted_text": text_path, "results": json_path, "visualization": visualization_path}
+    manifest = write_run_manifest(output, "ocr", run_id or output.name, [result.input_image], paths, asdict(result.config), warnings=result.diagnostics.get("limitations", []), metrics=result.diagnostics)
+    paths["run_manifest"] = manifest
+    return paths

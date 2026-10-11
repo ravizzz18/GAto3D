@@ -64,6 +64,18 @@ Run OCR on an existing preprocessing directory:
 python ocr.py outputs\images\sample1 --output-dir outputs\ocr
 ```
 
+Run identifiers and output traceability:
+
+Each completed preprocessing, drawing-analysis, or OCR run writes a
+`run_manifest.json` containing the stage, run identifier, input paths, output
+paths, configuration, status, warnings, and metrics. If a requested output
+directory already contains expected files, a new directory is allocated below
+`runs\<generated-run-id>` instead of silently overwriting the prior run. Use
+`--run-id` for a stable explicit identifier; an existing identifier is rejected.
+The first run in an empty directory retains the requested path for compatibility
+but still receives a unique run ID in its manifest. Explicit comparison report
+paths are also collision-safe and receive a run-ID suffix when already present.
+
 OCR uses Tesseract, selected through the `pytesseract` Python wrapper. Install
 both dependencies:
 
@@ -90,18 +102,21 @@ Outputs are written to:
 - `outputs/images/deskewed.png`
 - `outputs/images/final.png`
 - `outputs/reports/<output-name>_comparison.json`
+- `outputs/images/<sample-or-run>/run_manifest.json` for preprocessing runs
 
 Stage 3 writes `lines.png`, `contours.png`, `text_regions.png`,
 `drawing_regions.png`, `overlay.png`, and `report.json` in the selected
 analysis directory. The report records source coordinates (x/y/width/height
 or line endpoints), candidate properties, effective parameters, and explicit
 limitations.
+It also writes `run_manifest.json`.
 
 OCR writes:
 
 - `outputs/ocr/extracted_text.txt`
 - `outputs/ocr/ocr_results.json`
 - `outputs/ocr/ocr_visualization.png`
+- `outputs/ocr/run_manifest.json`
 
 The JSON report stores each non-empty recognized word, confidence, bounding
 box, and input filename. Coordinates use the original selected image
@@ -121,6 +136,32 @@ The PDF type is currently reported as `raster` or `vector-or-mixed` using page i
 - `data/`: raw, intermediate, processed, annotation, and future dataset splits
 - `models/`, `training/`: reserved for later dataset-driven ML work
 - `outputs/`: generated images, reports, and reserved later-stage outputs
+
+Current generated-output layout is intentionally backward compatible:
+
+```text
+outputs/
+  images/<sample-or-run>/
+    original.png ... final.png
+    run_manifest.json
+    runs/<run-id>/                  # automatic collision-safe reruns
+  analysis/<sample-or-run>/
+    lines.png ... report.json
+    run_manifest.json
+    runs/<run-id>/
+  ocr/
+    extracted_text.txt
+    ocr_results.json
+    ocr_visualization.png
+    ground_truth/
+    evaluation/
+    improved/
+    runs/<run-id>/
+```
+
+Existing baseline, improved, evaluation, and ground-truth outputs are
+preserved. Generated outputs are ignored by Git except for explicitly
+force-added review annotations.
 
 ## Input requirements
 

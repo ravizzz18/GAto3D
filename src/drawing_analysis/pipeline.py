@@ -13,6 +13,8 @@ from typing import Any
 import cv2
 import numpy as np
 
+from src.utils.traceability import write_run_manifest
+
 
 @dataclass(frozen=True)
 class AnalysisConfig:
@@ -213,7 +215,7 @@ def analyze_preprocessed_directory(directory: str | Path, config: AnalysisConfig
     return analyze_image(image, config)
 
 
-def save_analysis(result: AnalysisResult, output_dir: str | Path, source_image: str | Path | None = None) -> dict[str, Path]:
+def save_analysis(result: AnalysisResult, output_dir: str | Path, source_image: str | Path | None = None, run_id: str | None = None) -> dict[str, Path]:
     output = Path(output_dir)
     output.mkdir(parents=True, exist_ok=True)
     paths: dict[str, Path] = {}
@@ -226,4 +228,6 @@ def save_analysis(result: AnalysisResult, output_dir: str | Path, source_image: 
     report_path = output / "report.json"
     report_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
     paths["report"] = report_path
+    write_run_manifest(output, "drawing_analysis", run_id or output.name, [source_image] if source_image else [], paths, asdict(result.config), warnings=result.diagnostics.get("limitations", []), metrics=result.diagnostics)
+    paths["run_manifest"] = output / "run_manifest.json"
     return paths

@@ -41,3 +41,15 @@ These metrics are valid only for the selected subset. Because unannotated
 page text and false positives are outside the annotation scope, this is not
 evidence that OCR is reliable enough for general Ship GA drawings or for
 Stage 5.
+
+Output traceability audit:
+- Existing preprocessing, analysis, and OCR commands used fixed filenames and
+  could overwrite a prior run.
+- Existing OCR experiments were spread across baseline, improved, and
+  evaluation directories without a common manifest.
+- Preprocessing, analysis, and OCR now write `run_manifest.json` with stage,
+  run ID, input/output paths, configuration, status, warnings, and metrics.
+- Collision-safe output allocation creates `runs/<run-id>` when expected
+  output files already exist; existing baseline paths are not moved or deleted.
+- Stages 1-3 remain independently runnable through `main.py`, `analyze.py`,
+  and `ocr.py`; later architecture stages remain placeholders.
