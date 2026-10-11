@@ -34,7 +34,7 @@ def main() -> None:
     render_page(args.pdf, args.page, original_path, dpi=dpi)
     LOGGER.info("Rendered page %d at %d DPI", args.page, dpi)
     result = preprocess_image(load_image(original_path), config)
-    paths = save_stages(result, args.output_dir)
+    paths = save_stages(result, output_dir)
     report = build_comparison_report(original_path, paths["final"], args.page, dpi, result.processing_time_seconds, config.__dict__, result.diagnostics)
     report_path = collision_safe_file(args.report, run_id) if args.report else Path("outputs/reports") / f"{run_id}_comparison.json"
     save_comparison_report(report, report_path)
