@@ -1,10 +1,10 @@
 # Automated Ship GA to 3D CAD
 
-Research software for incrementally converting Ship General Arrangement drawings into structured information and, later, 3D/CAD geometry. The repository currently implements only the first milestone:
+Research software for incrementally converting Ship General Arrangement drawings into structured information and, later, 3D/CAD geometry. The repository currently implements the first four milestones:
 
-`PDF page -> high-resolution PNG -> conservative preprocessing -> inspectable image stages`
+`PDF page -> high-resolution PNG -> conservative preprocessing -> drawing feature candidates -> OCR`
 
-No OCR, machine learning, 3D reconstruction, CAD generation, STEP/IGES export, or fabricated predictions are implemented.
+No dimension parsing, machine learning, 3D reconstruction, CAD generation, STEP/IGES export, or fabricated predictions are implemented.
 
 ## Current status
 
@@ -13,7 +13,9 @@ No OCR, machine learning, 3D reconstruction, CAD generation, STEP/IGES export, o
 - The default threshold method is scale-aware background subtraction. Otsu, adaptive mean, and adaptive Gaussian methods remain selectable for comparison.
 - Rendering and preprocessing parameters are stored in `config/default.json`, including background scale, threshold, morphology, and connected-component controls.
 - A JSON comparison report records dimensions, page, DPI, parameters, processing time, foreground ratio, edge density, connected components, large-component ratio, and an edge-preservation estimate.
-- A real Ship GA PDF has not been supplied in this workspace, so no real drawing output is claimed.
+- Stage 3 extracts configurable horizontal, vertical, and diagonal line candidates, contour/shape candidates, text-region candidates, and drawing-region candidates from `final.png`.
+- Stage 3 saves independent visualisations and a coordinate-bearing JSON report. Results are candidates for visual review, not accuracy measurements.
+- Stage 4 provides configurable Tesseract OCR with word text, confidence, original-image coordinates, and an annotated visualisation.
 
 ## Setup
 
@@ -49,6 +51,32 @@ Use a separate output and report path when comparing drawings:
 python main.py path\to\ship_ga.pdf --output-dir outputs\images\sample1 --report outputs\reports\sample1_comparison.json
 ```
 
+Run Stage 3 on an existing preprocessed directory without rerunning preprocessing:
+
+```powershell
+python analyze.py outputs\images\sample1 --output-dir outputs\analysis\sample1
+python analyze.py outputs\images\noisy --output-dir outputs\analysis\noisy
+```
+
+Run OCR on an existing preprocessing directory:
+
+```powershell
+python ocr.py outputs\images\sample1 --output-dir outputs\ocr
+```
+
+OCR uses Tesseract, selected through the `pytesseract` Python wrapper. Install
+both dependencies:
+
+```powershell
+python -m pip install -r requirements.txt
+```
+
+On Windows, install the native Tesseract OCR application separately and ensure
+`tesseract.exe` is on `PATH`, or set `ocr.tesseract_cmd` in
+`config\default.json` to its full path. The `eng` language data must also be
+installed. `input_stage` can be changed to `enhanced`, `grayscale`, or
+`original`; the existing preprocessing code and parameters are not changed.
+
 Outputs are written to:
 
 - `outputs/images/original.png`
@@ -59,6 +87,22 @@ Outputs are written to:
 - `outputs/images/deskewed.png`
 - `outputs/images/final.png`
 - `outputs/reports/<output-name>_comparison.json`
+
+Stage 3 writes `lines.png`, `contours.png`, `text_regions.png`,
+`drawing_regions.png`, `overlay.png`, and `report.json` in the selected
+analysis directory. The report records source coordinates (x/y/width/height
+or line endpoints), candidate properties, effective parameters, and explicit
+limitations.
+
+OCR writes:
+
+- `outputs/ocr/extracted_text.txt`
+- `outputs/ocr/ocr_results.json`
+- `outputs/ocr/ocr_visualization.png`
+
+The JSON report stores each non-empty recognized word, confidence, bounding
+box, and input filename. Coordinates use the original selected image
+dimensions; no resizing is applied by the OCR module.
 
 Reports are marked `WARNING` because the diagnostics are heuristics and cannot certify OCR suitability without ground truth. Visual review of text, dimensions, and structural lines remains required.
 
@@ -82,7 +126,10 @@ The input must be a readable PDF. Page numbers are one-based. High-resolution ou
 
 - Raster/vector classification is a heuristic, not full PDF content analysis.
 - Deskewing is conservative and uses visible dark-pixel geometry; unusual layouts should be visually reviewed using the saved stages.
-- No OCR, dimensions, component recognition, intermediate ship representation, 3D reconstruction, CAD, or validation stages are started.
+- Stage 3 uses heuristic OpenCV candidates; text regions are not OCR results and drawing regions are not ship-component classifications.
+- Tesseract recognition on dense GA drawings can merge labels, miss small text, or misread engineering glyphs. Successful execution is not an accuracy result.
+- OCR output must be visually reviewed and is not dimension extraction or ship-component recognition.
+- No dimensions, component recognition, intermediate ship representation, 3D reconstruction, CAD, or validation stages are started.
 - No metrics are reported for real drawings until an annotated dataset and evaluation protocol exist.
 
 ## Future modules
