@@ -74,8 +74,11 @@ python -m pip install -r requirements.txt
 On Windows, install the native Tesseract OCR application separately and ensure
 `tesseract.exe` is on `PATH`, or set `ocr.tesseract_cmd` in
 `config\default.json` to its full path. The `eng` language data must also be
-installed. `input_stage` can be changed to `enhanced`, `grayscale`, or
-`original`; the existing preprocessing code and parameters are not changed.
+installed. The current default uses `enhanced.png` with
+`minimum_confidence=50` and page segmentation mode 11 (sparse text), based on
+the clean/noisy comparison described below. `input_stage` can be changed to
+`final`, `grayscale`, or `original`; the existing preprocessing code and
+parameters are not changed.
 
 Outputs are written to:
 
@@ -102,7 +105,8 @@ OCR writes:
 
 The JSON report stores each non-empty recognized word, confidence, bounding
 box, and input filename. Coordinates use the original selected image
-dimensions; no resizing is applied by the OCR module.
+dimensions; no resizing is applied by the OCR module. It also records
+confidence summaries and a normalized duplicate-count diagnostic for review.
 
 Reports are marked `WARNING` because the diagnostics are heuristics and cannot certify OCR suitability without ground truth. Visual review of text, dimensions, and structural lines remains required.
 
@@ -129,6 +133,30 @@ The input must be a readable PDF. Page numbers are one-based. High-resolution ou
 - Stage 3 uses heuristic OpenCV candidates; text regions are not OCR results and drawing regions are not ship-component classifications.
 - Tesseract recognition on dense GA drawings can merge labels, miss small text, or misread engineering glyphs. Successful execution is not an accuracy result.
 - OCR output must be visually reviewed and is not dimension extraction or ship-component recognition.
+- On the available clean sample, the baseline `final.png`/confidence 0 run
+  produced 3,207 items (median confidence 41); `enhanced.png`/confidence 50
+  produced 1,521 items (median confidence 74) and retained visible labels such
+  as GENERAL ARRANGEMENT, BULK CARRIER, DECK, and MIDSHIP SECTION.
+- On the available noisy sample, the baseline produced 576 items (median
+  confidence 29); the enhanced/confidence-50 variant produced 43 items
+  (median confidence 62) but did not reliably recover dimension values.
+- These counts and labels are observations from this run, not accuracy
+  measurements. No ground-truth transcription exists, and visual inspection
+  still shows missed text, false detections, and duplicate words.
+- A small manually reviewed clean-drawing evaluation set is available at
+  `outputs/ocr/ground_truth/sample1_annotations.json`. Run
+  `python evaluate_ocr.py outputs/ocr/ground_truth/sample1_annotations.json
+  outputs/ocr/improved/sample1/ocr_results.json` to produce a scoped report.
+  It uses one-to-one IoU matching (threshold 0.5), uppercase/punctuation
+  normalization for recognition, and reports dimension exact matches
+  separately. The set is deliberately incomplete; scoped precision is not
+  whole-page precision and unannotated text is not scored.
+- The current 18-region report matched all 18 selected regions and all six
+  selected dimension values. This result is not sufficient evidence of
+  whole-page OCR reliability: the set is small, was selected from clearly
+  visible important regions, and does not annotate every text item or every
+  false positive. The reported 1.0 recall and exact-match values therefore
+  apply only to this reviewed subset.
 - No dimensions, component recognition, intermediate ship representation, 3D reconstruction, CAD, or validation stages are started.
 - No metrics are reported for real drawings until an annotated dataset and evaluation protocol exist.
 

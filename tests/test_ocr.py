@@ -30,6 +30,8 @@ def test_ocr_preserves_image_coordinates_and_saves_outputs(tmp_path: Path) -> No
     assert result.image_height == 80
     assert result.items[0]["text"] == "DECK"
     assert result.items[0]["bbox"] == {"x": 10, "y": 20, "width": 40, "height": 12}
+    assert result.diagnostics["confidence_median"] == 81.75
+    assert result.diagnostics["items_at_or_above_50"] == 2
     paths = save_ocr_result(result, tmp_path / "ocr")
     report = json.loads(paths["results"].read_text(encoding="utf-8"))
     assert report["items"][1]["input_image"] == "final.png"

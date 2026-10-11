@@ -3,6 +3,8 @@
 from dataclasses import asdict, dataclass
 import json
 from pathlib import Path
+import re
+import statistics
 from typing import Any, Callable
 
 import cv2
@@ -33,6 +35,27 @@ class OCRResult:
     diagnostics: dict[str, Any]
     visualization: np.ndarray
     config: OCRConfig
+
+
+def _ocr_diagnostics(items: list[dict[str, Any]]) -> dict[str, Any]:
+    confidences = [float(item["confidence"]) for item in items]
+    normalized = [re.sub(r"[^A-Z0-9.]", "", item["text"].upper()) for item in items]
+    duplicate_count = len(normalized) - len(set(normalized))
+    return {
+        "quality": "UNVERIFIED",
+        "item_count": len(items),
+        "empty_result": not items,
+        "confidence_mean": round(statistics.mean(confidences), 3) if confidences else None,
+        "confidence_median": round(statistics.median(confidences), 3) if confidences else None,
+        "items_at_or_above_50": sum(confidence >= 50 for confidence in confidences),
+        "items_at_or_above_70": sum(confidence >= 70 for confidence in confidences),
+        "normalized_duplicate_count": duplicate_count,
+        "limitations": [
+            "OCR output requires visual review",
+            "no accuracy is claimed without ground-truth transcription",
+            "dimension parsing and component recognition are not performed",
+        ],
+    }
 
 
 def _load_tesseract() -> tuple[Any, Any]:
@@ -132,7 +155,7 @@ def run_ocr(input_path: str | Path, config: OCRConfig | None = None, data_reader
         image_height=int(image.shape[0]),
         items=items,
         extracted_text="\n".join(item["text"] for item in items),
-        diagnostics={"quality": "UNVERIFIED", "item_count": len(items), "empty_result": not items, "limitations": ["OCR output requires visual review", "no accuracy is claimed without ground-truth transcription", "dimension parsing and component recognition are not performed"]},
+        diagnostics=_ocr_diagnostics(items),
         visualization=_visualize(image, items),
         config=config,
     )

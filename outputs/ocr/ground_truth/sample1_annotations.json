@@ -1,0 +1,34 @@
+{
+  "source_image": "outputs/images/sample1/enhanced.png",
+  "image_dimensions": {
+    "width": 19134,
+    "height": 8621
+  },
+  "annotation_method": "Manual review of the source enhanced.png and bounded source crops; coordinates are in source-image pixels. OCR output was used only after visual confirmation of the text and region.",
+  "annotations": [
+    {"id": "title-general", "text": "GENERAL", "category": "title", "bbox": {"x": 8833, "y": 280, "width": 791, "height": 174}},
+    {"id": "title-arrangement", "text": "ARRANGEMENT", "category": "title", "bbox": {"x": 9867, "y": 280, "width": 1263, "height": 174}},
+    {"id": "ship-bulk", "text": "BULK", "category": "ship_particular", "bbox": {"x": 9913, "y": 522, "width": 309, "height": 121}},
+    {"id": "ship-carrier", "text": "CARRIER", "category": "ship_particular", "bbox": {"x": 10314, "y": 522, "width": 550, "height": 121}},
+    {"id": "deck-navigation", "text": "DECK(NAVIGATION", "category": "deck_label", "bbox": {"x": 462, "y": 235, "width": 867, "height": 91}},
+    {"id": "deck-navigation-close", "text": "DECK)", "category": "deck_label", "bbox": {"x": 1380, "y": 235, "width": 286, "height": 91}},
+    {"id": "deck-compass", "text": "DECK(COMPASS", "category": "deck_label", "bbox": {"x": 2596, "y": 484, "width": 767, "height": 91}},
+    {"id": "deck-compass-close", "text": "DECK)", "category": "deck_label", "bbox": {"x": 3410, "y": 484, "width": 286, "height": 91}},
+    {"id": "midship", "text": "MIDSHIP", "category": "drawing_label", "bbox": {"x": 17275, "y": 1212, "width": 383, "height": 74}},
+    {"id": "section", "text": "SECTION", "category": "drawing_label", "bbox": {"x": 17702, "y": 1212, "width": 404, "height": 74}},
+    {"id": "length-overall", "text": "185.18", "category": "dimension", "bbox": {"x": 18491, "y": 5505, "width": 262, "height": 49}},
+    {"id": "length-between", "text": "177.00", "category": "dimension", "bbox": {"x": 18490, "y": 5595, "width": 261, "height": 49}},
+    {"id": "breadth", "text": "30.00", "category": "dimension", "bbox": {"x": 18523, "y": 5685, "width": 230, "height": 49}},
+    {"id": "depth", "text": "14.70", "category": "dimension", "bbox": {"x": 18528, "y": 5773, "width": 225, "height": 49}},
+    {"id": "draft-design", "text": "9.00", "category": "dimension", "bbox": {"x": 18561, "y": 5860, "width": 194, "height": 49}},
+    {"id": "draft-scantling", "text": "9.75m", "category": "dimension", "bbox": {"x": 18561, "y": 5948, "width": 194, "height": 49}},
+    {"id": "title-block-general", "text": "GENERAL", "category": "title_block", "bbox": {"x": 18026, "y": 8010, "width": 308, "height": 51}},
+    {"id": "title-block-arrangement", "text": "ARRANGEMENT", "category": "title_block", "bbox": {"x": 18355, "y": 8010, "width": 507, "height": 51}}
+  ],
+  "limitations": [
+    "This is a small manually reviewed subset, not a complete transcription of the drawing.",
+    "Only text clearly visible in the source crop was included; ambiguous small title-block and dimension-unit text was excluded.",
+    "Precision is scoped to predictions overlapping annotated regions and must not be interpreted as whole-page OCR precision.",
+    "No accuracy claim is made for unannotated text, duplicated labels, or OCR output outside these regions."
+  ]
+}
